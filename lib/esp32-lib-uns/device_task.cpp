@@ -259,8 +259,6 @@ void dvtask_monitor_actuators (void *pvParameters) {
                 Serial.println("[INFO] RELAY0 turned off.");
                 status_blink(STATUS_DATA_PUBLISHED, 1, STATUS_DEFAULT_DELAY_MS);
             }
-
-            Serial.println("DEBUG [time] : " + String(run_time.hour) + ":" + String(run_time.minute) + ":" + String(run_time.second));
         }
     }
 }
