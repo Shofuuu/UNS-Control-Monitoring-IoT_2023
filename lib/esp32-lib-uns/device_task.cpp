@@ -206,11 +206,11 @@ void dvtask_handle_client (void *pvParameters) {
 void dvtask_monitor_actuators (void *pvParameters) {
     time_keeping_t run_time = time_keeping_get();
     
-    time_keeping_t elapsed_mins = {
-        .hour = ELAPSED_HOURS,
-        .minute = 1,
-        .second = ELAPSED_SECONDS
-    };
+    // time_keeping_t elapsed_mins = {
+    //     .hour = ELAPSED_HOURS,
+    //     .minute = 1,
+    //     .second = ELAPSED_SECONDS
+    // };
 
     time_keeping_t blower_const_time = {
         .hour = 0,
@@ -221,16 +221,13 @@ void dvtask_monitor_actuators (void *pvParameters) {
     time_keeping_t water_const_time = {
         .hour = 2,
         .minute = 3,
-        .second = 5
+        .second = 3
     };
 
     while (1) {
         run_time = time_keeping_get();
 
-        if ( WiFi.status() == WL_CONNECTED 
-             && time_keeping_multiple_mins(run_time, elapsed_mins)
-             && (run_time.second == elapsed_mins.second) ) {
-
+        if ( WiFi.status() == WL_CONNECTED) {
             // read temperatures
             float temperatures_value[2] = {0.0f};
             float temperatures_average = 0.0f;
