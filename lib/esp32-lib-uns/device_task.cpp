@@ -221,7 +221,7 @@ void dvtask_monitor_actuators (void *pvParameters) {
     time_keeping_t water_const_time = {
         .hour = 2,
         .minute = 3,
-        .second = 0
+        .second = 5
     };
 
     while (1) {
@@ -232,16 +232,15 @@ void dvtask_monitor_actuators (void *pvParameters) {
              && (run_time.second == elapsed_mins.second) ) {
 
             // read temperatures
-            // float temperatures_value[2] = {0.0f};
-            // float temperatures_average = 0.0f;
-            // if (request_read_get_http(&temperatures_value[0], FIELD_TEMPERATURES0) == REQUEST_HTTP_OK
-            //     && request_read_get_http(&temperatures_value[1], FIELD_TEMPERATURES1) == REQUEST_HTTP_OK) {
-            //     temperatures_average = (temperatures_value[0] + temperatures_value[1]) / 2.0f;
-            // }
+            float temperatures_value[2] = {0.0f};
+            float temperatures_average = 0.0f;
+            if (request_read_get_http(&temperatures_value[0], FIELD_TEMPERATURES0) == REQUEST_HTTP_OK
+                && request_read_get_http(&temperatures_value[1], FIELD_TEMPERATURES1) == REQUEST_HTTP_OK) {
+                temperatures_average = (temperatures_value[0] + temperatures_value[1]) / 2.0f;
+            }
 
             // control fan
-            if (time_keeping_multiple_mins(run_time, blower_const_time) && 
-                (run_time.second == blower_const_time.second)) {
+            if (temperatures_average > 25) {
                 actuators_set(ACTUATORS_RELAY1, CONTROLLER_ENABLE_RELAY);
                 Serial.println("[INFO] RELAY1 turned on.");
                 status_blink(STATUS_DATA_PUBLISHED, 1, STATUS_DEFAULT_DELAY_MS);
@@ -252,23 +251,21 @@ void dvtask_monitor_actuators (void *pvParameters) {
             // read soil moisture
             if (time_keeping_multiple_hours(run_time, water_const_time) &&
                 (run_time.minute == 0) &&
-                (run_time.second == water_const_time.second)) {
+                (run_time.second <= water_const_time.second)) {
                 actuators_set(ACTUATORS_RELAY0, CONTROLLER_ENABLE_RELAY);
                 Serial.println("[INFO] RELAY0 turned on.");
                 status_blink(STATUS_DATA_PUBLISHED, 1, STATUS_DEFAULT_DELAY_MS);
-            } else {
-                actuators_set(ACTUATORS_RELAY0, CONTROLLER_DISABLE_RELAY);
-            }
-            
-            if (time_keeping_multiple_hours(run_time, water_const_time) &&
-                (run_time.minute == 3) &&
-                (run_time.second == water_const_time.second)) {
+            }else if (time_keeping_multiple_hours(run_time, water_const_time) &&
+                (run_time.minute == water_const_time.minute) &&
+                (run_time.second <= water_const_time.second)) {
                 actuators_set(ACTUATORS_RELAY0, CONTROLLER_DISABLE_RELAY);
                 Serial.println("[INFO] RELAY0 turned off.");
                 status_blink(STATUS_DATA_PUBLISHED, 1, STATUS_DEFAULT_DELAY_MS);
             } else {
                 actuators_set(ACTUATORS_RELAY0, CONTROLLER_DISABLE_RELAY);
             }
+
+            Serial.println("DEBUG [time] : " + String(run_time.hour) + ":" + String(run_time.minute) + ":" + String(run_time.second));
         }
     }
 }
